@@ -3,7 +3,7 @@
 
     <application
         android:name="${applicationName}"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@mipmap/ic_launcher"
         android:label="Naganoor Village">
         <activity
             android:name=".MainActivity"
