@@ -1,0 +1,4 @@
+enum AppUpdateType {
+  flexible,
+  immediate,
+}
