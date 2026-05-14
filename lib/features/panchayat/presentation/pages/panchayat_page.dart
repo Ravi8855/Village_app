@@ -10,7 +10,9 @@ import '../panchayat_providers.dart';
 import '../widgets/panchayat_item_card.dart';
 
 class PanchayatPage extends ConsumerWidget {
-  const PanchayatPage({super.key});
+  const PanchayatPage({super.key, this.sectionFilter});
+
+  final PanchayatSectionType? sectionFilter;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -19,7 +21,7 @@ class PanchayatPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Panchayat'),
+        title: Text(sectionFilter?.label ?? 'Panchayat'),
       ),
       body: RefreshIndicator(
         onRefresh: () async {
@@ -31,66 +33,74 @@ class PanchayatPage extends ConsumerWidget {
           children: [
             const _PanchayatHero(),
             const SizedBox(height: 16),
-            _SectionBlock(
-              title: 'Water Supply',
-              icon: Icons.water_drop_rounded,
-              accent: AppColors.sky,
-              asyncItems: services,
-              filter: PanchayatSectionType.waterSupply,
-            ),
-            _SectionBlock(
-              title: 'Electricity Supply',
-              icon: Icons.bolt_rounded,
-              accent: const Color(0xFFF9A825),
-              asyncItems: services,
-              filter: PanchayatSectionType.electricity,
-            ),
-            _SectionBlock(
-              title: 'Gram KB / Knowledge Board',
-              icon: Icons.menu_book_rounded,
-              accent: AppColors.leaf,
-              asyncItems: services,
-              filter: PanchayatSectionType.knowledgeBoard,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Panchayat Yojanas',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-            ),
-            const SizedBox(height: 8),
-            yojanas.when(
-              data: (items) {
-                if (items.isEmpty) {
-                  return const AppEmptyState(
-                    title: 'No yojanas listed yet',
-                    icon: Icons.account_balance_rounded,
-                  );
-                }
-                return Column(
-                  children: [
-                    for (final item in items)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
-                        child: PanchayatItemCard(
-                          title: item.title,
-                          description: item.description,
-                          status: item.status.label,
-                          date: item.eventDate,
-                          imageUrl: item.imageUrl,
-                          accent: AppColors.clay,
-                        ),
-                      ),
-                  ],
-                );
-              },
-              loading: () => const AppLoading(message: 'Loading yojanas…'),
-              error: (e, _) => AppError(
-                message: e.toString(),
-                onRetry: () => ref.invalidate(yojanasProvider),
+            if (sectionFilter == null ||
+                sectionFilter == PanchayatSectionType.waterSupply)
+              _SectionBlock(
+                title: 'Water Supply',
+                icon: Icons.water_drop_rounded,
+                accent: AppColors.sky,
+                asyncItems: services,
+                filter: PanchayatSectionType.waterSupply,
               ),
-            ),
+            if (sectionFilter == null ||
+                sectionFilter == PanchayatSectionType.electricity)
+              _SectionBlock(
+                title: 'Electricity Supply',
+                icon: Icons.bolt_rounded,
+                accent: const Color(0xFFF9A825),
+                asyncItems: services,
+                filter: PanchayatSectionType.electricity,
+              ),
+            if (sectionFilter == null ||
+                sectionFilter == PanchayatSectionType.knowledgeBoard)
+              _SectionBlock(
+                title: 'Gram KB / Knowledge Board',
+                icon: Icons.menu_book_rounded,
+                accent: AppColors.leaf,
+                asyncItems: services,
+                filter: PanchayatSectionType.knowledgeBoard,
+              ),
+            if (sectionFilter == null) ...[
+              const SizedBox(height: 8),
+              Text(
+                'Panchayat Yojanas',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+              ),
+              const SizedBox(height: 8),
+              yojanas.when(
+                data: (items) {
+                  if (items.isEmpty) {
+                    return const AppEmptyState(
+                      title: 'No yojanas listed yet',
+                      icon: Icons.account_balance_rounded,
+                    );
+                  }
+                  return Column(
+                    children: [
+                      for (final item in items)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: PanchayatItemCard(
+                            title: item.title,
+                            description: item.description,
+                            status: item.status.label,
+                            date: item.eventDate,
+                            imageUrl: item.imageUrl,
+                            accent: AppColors.clay,
+                          ),
+                        ),
+                    ],
+                  );
+                },
+                loading: () => const AppLoading(message: 'Loading yojanas…'),
+                error: (e, _) => AppError(
+                  message: e.toString(),
+                  onRetry: () => ref.invalidate(yojanasProvider),
+                ),
+              ),
+            ],
             if (!EnvConfig.supabaseEnabled) ...[
               const SizedBox(height: 16),
               Text(

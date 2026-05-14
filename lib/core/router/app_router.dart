@@ -9,7 +9,10 @@ import '../../features/news/presentation/pages/news_page.dart';
 import '../../features/panchayat/presentation/pages/panchayat_page.dart';
 import '../../features/temples/presentation/pages/temple_detail_page.dart';
 import '../../features/temples/presentation/pages/temples_list_page.dart';
+import '../../features/village_services/presentation/pages/bank_page.dart';
+import '../../features/village_services/presentation/pages/postman_page.dart';
 import '../../features/weather/presentation/pages/weather_page.dart';
+import '../../features/panchayat/domain/panchayat_models.dart';
 import '../shell/scaffold_with_bottom_nav.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -32,6 +35,25 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                     path: 'panchayat',
                     name: AppRouteNames.panchayat,
                     builder: (context, state) => const PanchayatPage(),
+                    routes: [
+                      GoRoute(
+                        path: 'electricity',
+                        name: AppRouteNames.electricity,
+                        builder: (context, state) => const PanchayatPage(
+                          sectionFilter: PanchayatSectionType.electricity,
+                        ),
+                      ),
+                    ],
+                  ),
+                  GoRoute(
+                    path: 'bank',
+                    name: AppRouteNames.bank,
+                    builder: (context, state) => const BankPage(),
+                  ),
+                  GoRoute(
+                    path: 'postman',
+                    name: AppRouteNames.postman,
+                    builder: (context, state) => const PostmanPage(),
                   ),
                   GoRoute(
                     path: 'temples',
@@ -104,6 +126,9 @@ class AppRoutePaths {
   static const weather = '/weather';
   static const health = '/health';
   static const panchayat = '/home/panchayat';
+  static const electricity = '/home/panchayat/electricity';
+  static const bank = '/home/bank';
+  static const postman = '/home/postman';
   static const temples = '/home/temples';
   static const annabhagya = '/home/annabhagya';
   static String templeDetail(String id) => '/home/temples/$id';
@@ -117,6 +142,9 @@ class AppRouteNames {
   static const weather = 'weather';
   static const health = 'health';
   static const panchayat = 'panchayat';
+  static const electricity = 'electricity';
+  static const bank = 'bank';
+  static const postman = 'postman';
   static const temples = 'temples';
   static const templeDetail = 'templeDetail';
   static const annabhagya = 'annabhagya';
