@@ -1,0 +1,70 @@
+# Builds the Flutter web app and publishes to GitHub Pages on every push to main.
+# Users get the latest version on refresh — no app code changes required.
+#
+# One-time repo setup (GitHub → Settings → Secrets and variables → Actions):
+#   SUPABASE_URL
+#   SUPABASE_ANON_KEY
+#   MAPS_API_KEY          (optional)
+#   ADMIN_EMAIL           (optional; defaults in app if omitted)
+#
+# Enable Pages: Settings → Pages → Source = "GitHub Actions".
+
+name: Deploy Web
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-web-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Create dart_defines.json
+        run: |
+          cat > dart_defines.json <<EOF
+          {
+            "SUPABASE_URL": "${{ secrets.SUPABASE_URL }}",
+            "SUPABASE_ANON_KEY": "${{ secrets.SUPABASE_ANON_KEY }}",
+            "ADMIN_EMAIL": "${{ secrets.ADMIN_EMAIL || 'ravichalmar@gmail.com' }}",
+            "MAPS_API_KEY": "${{ secrets.MAPS_API_KEY }}"
+          }
+          EOF
+
+      - name: Build web
+        run: |
+          flutter pub get
+          flutter build web --release \
+            --dart-define-from-file=dart_defines.json \
+            --base-href "/${{ github.event.repository.name }}/"
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/web
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
