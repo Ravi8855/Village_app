@@ -1,0 +1,38 @@
+# Quality gate — runs on every push/PR to main before deploy workflows ship a build.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Create dart_defines.json
+        run: |
+          cat > dart_defines.json <<EOF
+          {
+            "SUPABASE_URL": "https://example.supabase.co",
+            "SUPABASE_ANON_KEY": "placeholder",
+            "ADMIN_EMAIL": "admin@example.com",
+            "MAPS_API_KEY": ""
+          }
+          EOF
+
+      - run: flutter pub get
+      - run: flutter analyze --no-fatal-infos
+      - run: flutter test

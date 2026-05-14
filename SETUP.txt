@@ -33,3 +33,35 @@ Environment keys (dart_defines.json):
 - SUPABASE_URL
 - SUPABASE_ANON_KEY
 - MAPS_API_KEY (optional)
+
+8) Auto-update when you push to GitHub (main branch)
+   The repo includes GitHub Actions workflows:
+
+   a) .github/workflows/ci.yml
+      - Runs flutter analyze + flutter test on every push/PR to main.
+
+   b) .github/workflows/deploy-android.yml
+      - On push to main: bumps build number, builds signed AAB + APK,
+        uploads to Google Play (internal track by default), commits
+        pubspec version back to git.
+      - Phones installed from Play (same track) see an in-app update
+        prompt on next open (AppUpdateHost + in_app_update package).
+
+   c) .github/workflows/deploy-web.yml
+      - On push to main: builds web and deploys to GitHub Pages
+        (users get latest on browser refresh).
+
+   One-time GitHub secrets (Settings → Secrets and variables → Actions):
+   - SUPABASE_URL, SUPABASE_ANON_KEY
+   - ANDROID_KEYSTORE_BASE64 (base64 of your .jks file)
+   - ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD
+   - GOOGLE_PLAY_SERVICE_ACCOUNT (Play Console API JSON)
+
+   Optional repository variable (Settings → Variables):
+   - PLAY_TRACK = internal | alpha | beta | production
+
+   Play Console: add testers to the same track CI uses (default: internal).
+   Sideload APKs do NOT auto-update via Play — use Play internal testing
+   or download the APK from the GitHub Actions artifact after each deploy.
+
+   Manual deploy: GitHub → Actions → Deploy Android → Run workflow.

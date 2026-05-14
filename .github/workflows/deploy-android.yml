@@ -1,18 +1,13 @@
-# Builds a signed Android App Bundle and uploads to Google Play on every push to main.
-# Installed apps pick up the new version through the existing in_app_update flow.
+# Push to main → test → bump version → build signed AAB → upload to Google Play.
+# Installed Play builds auto-prompt via in_app_update (AppUpdateHost in lib/app.dart).
 #
-# One-time repo setup (GitHub → Settings → Secrets and variables → Actions):
-#   SUPABASE_URL
-#   SUPABASE_ANON_KEY
-#   MAPS_API_KEY                  (optional)
-#   ADMIN_EMAIL                   (optional)
-#   ANDROID_KEYSTORE_BASE64       (base64-encoded .jks / keystore file)
-#   ANDROID_KEYSTORE_PASSWORD
-#   ANDROID_KEY_ALIAS
-#   ANDROID_KEY_PASSWORD
-#   GOOGLE_PLAY_SERVICE_ACCOUNT   (JSON service account with Play Console API access)
+# Required GitHub secrets (Settings → Secrets and variables → Actions):
+#   SUPABASE_URL, SUPABASE_ANON_KEY
+#   ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD
+#   GOOGLE_PLAY_SERVICE_ACCOUNT
+# Optional: MAPS_API_KEY, ADMIN_EMAIL, PLAY_TRACK (default: internal)
 #
-# Play Console: create an internal-testing release track; the workflow publishes there.
+# Play Console: testers must install from the same track CI publishes to.
 
 name: Deploy Android
 
@@ -25,9 +20,14 @@ concurrency:
   group: deploy-android-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    # Skip redeploy when only the automated version-bump commit was pushed.
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
 
     steps:
       - name: Checkout
@@ -57,10 +57,22 @@ jobs:
           EOF
 
       - name: Bump Android build number
+        id: version
         run: |
           BASE_VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //; s/+.*//')
-          sed -i "s/^version: .*/version: ${BASE_VERSION}+${{ github.run_number }}/" pubspec.yaml
+          NEW_VERSION="${BASE_VERSION}+${{ github.run_number }}"
+          sed -i "s/^version: .*/version: ${NEW_VERSION}/" pubspec.yaml
+          echo "new_version=${NEW_VERSION}" >> "$GITHUB_OUTPUT"
           grep '^version:' pubspec.yaml
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze --no-fatal-infos
+
+      - name: Test
+        run: flutter test
 
       - name: Decode signing keystore
         run: |
@@ -72,16 +84,46 @@ jobs:
           storeFile=upload-keystore.jks
           EOF
 
-      - name: Build App Bundle
+      - name: Prepare Play Store release notes
         run: |
-          flutter pub get
-          flutter build appbundle --release --dart-define-from-file=dart_defines.json
+          mkdir -p whatsnew/whatsnew-en-US
+          MSG="${{ github.event.head_commit.message }}"
+          if [ -z "$MSG" ]; then
+            MSG="Bug fixes and improvements."
+          fi
+          printf '%s' "$MSG" | head -c 480 > whatsnew/whatsnew-en-US/whatsnew-en-US.txt
 
-      - name: Upload to Google Play (internal)
+      - name: Build App Bundle
+        run: flutter build appbundle --release --dart-define-from-file=dart_defines.json
+
+      - name: Build APK (artifact for sideload testing)
+        run: flutter build apk --release --dart-define-from-file=dart_defines.json
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-apk-${{ steps.version.outputs.new_version }}
+          path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 30
+
+      - name: Upload to Google Play
         uses: r0adkll/upload-google-play-action@v1.1.3
         with:
           serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT }}
           packageName: com.naganoor.village_app
           releaseFiles: build/app/outputs/bundle/release/app-release.aab
-          track: internal
+          track: ${{ vars.PLAY_TRACK || 'internal' }}
           status: completed
+          whatsNewDirectory: whatsnew
+
+      - name: Commit version bump
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add pubspec.yaml
+          if git diff --staged --quiet; then
+            echo "No pubspec changes to commit."
+            exit 0
+          fi
+          git commit -m "chore: release Android ${{ steps.version.outputs.new_version }} [skip ci]"
+          git push
