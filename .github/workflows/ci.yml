@@ -28,7 +28,10 @@ jobs:
           {
             "SUPABASE_URL": "https://example.supabase.co",
             "SUPABASE_ANON_KEY": "placeholder",
-            "ADMIN_EMAIL": "admin@example.com",
+            "EMAILJS_SERVICE_ID": "service_ib2e5fk",
+            "EMAILJS_TEMPLATE_ID": "template_l4ieguu",
+            "EMAILJS_PUBLIC_KEY": "dGt7FQDgGufoc7sVy",
+            "SUPER_ADMIN_EMAIL": "ravivtu12345@gmail.com",
             "MAPS_API_KEY": ""
           }
           EOF

@@ -1,9 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../features/ota_update/application/ota_update_service.dart';
 import '../config/env_config.dart';
-import '../push/push_notification_coordinator.dart';
-
 class Bootstrap {
   static bool _supabaseReady = false;
 
@@ -16,13 +15,11 @@ class Bootstrap {
         await Supabase.initialize(
           url: EnvConfig.supabaseUrl,
           anonKey: EnvConfig.supabaseAnonKey,
-          authOptions: const FlutterAuthClientOptions(
-            authFlowType: AuthFlowType.pkce,
-          ),
         );
         _supabaseReady = true;
         if (kDebugMode) {
           debugPrint('Supabase connected: ${EnvConfig.supabaseUrl}');
+          debugPrint('Supabase data client ready.');
         }
       } catch (e, st) {
         _supabaseReady = false;
@@ -38,6 +35,8 @@ class Bootstrap {
       );
     }
 
-    await pushCoordinator.initialize();
+    if (!kIsWeb) {
+      await OtaUpdateService().initialize();
+    }
   }
 }

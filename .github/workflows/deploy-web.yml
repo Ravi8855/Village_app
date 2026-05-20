@@ -48,7 +48,10 @@ jobs:
           {
             "SUPABASE_URL": "${{ secrets.SUPABASE_URL }}",
             "SUPABASE_ANON_KEY": "${{ secrets.SUPABASE_ANON_KEY }}",
-            "ADMIN_EMAIL": "${{ secrets.ADMIN_EMAIL || 'ravichalmar@gmail.com' }}",
+            "EMAILJS_SERVICE_ID": "${{ secrets.EMAILJS_SERVICE_ID }}",
+            "EMAILJS_TEMPLATE_ID": "${{ secrets.EMAILJS_TEMPLATE_ID }}",
+            "EMAILJS_PUBLIC_KEY": "${{ secrets.EMAILJS_PUBLIC_KEY }}",
+            "SUPER_ADMIN_EMAIL": "${{ secrets.SUPER_ADMIN_EMAIL || 'ravivtu12345@gmail.com' }}",
             "MAPS_API_KEY": "${{ secrets.MAPS_API_KEY }}"
           }
           EOF

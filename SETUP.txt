@@ -17,6 +17,17 @@ Naganoor Village App — setup
 
 4) Apply database schema (first time only):
    Supabase Dashboard → SQL Editor → run supabase/schema.sql
+   Then run supabase/apply_village_app_users.sql (required for signup / users)
+   Then run supabase/migrations/20250523_hybrid_auth.sql (password admin fields)
+
+6b) Auth (hybrid):
+   - Village users: /signup — one-time Email OTP, permanent session
+   - Super admin: /admin/login — ravivtu12345@gmail.com + SUPER_ADMIN_PASSWORD
+   - Dept admins: super admin creates with temp password → approve →
+     /admin/login (password) → one-time OTP at /admin/activate → password only
+
+   If signup shows "Could not find table village_app_users", paste and run
+   apply_village_app_users.sql, then hot-restart the app.
 
 5) Create an admin user:
    - Dashboard → Authentication → Users → Add user

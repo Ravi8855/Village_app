@@ -1,0 +1,145 @@
+# Push to main → Shorebird OTA patch for Android.
+# Installed Shorebird release builds receive the update via OtaUpdateHost (shorebird_code_push).
+#
+# Prerequisites (one-time, local):
+#   shorebird init          # sets app_id in shorebird.yaml
+#   shorebird release android --dart-define-from-file=dart_defines.json
+#
+# Required GitHub secrets:
+#   SHOREBIRD_TOKEN
+#   SUPABASE_URL, SUPABASE_ANON_KEY
+#   ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD
+# Optional: MAPS_API_KEY, ADMIN_EMAIL
+
+name: Shorebird Patch
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: shorebird-patch-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    # Skip automated version-bump commits from deploy-android.yml.
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Setup Shorebird CLI
+        uses: shorebirdtech/setup-shorebird@v1
+        with:
+          cache: true
+
+      - name: Verify Shorebird CI authentication
+        run: |
+          set -euo pipefail
+          if [ -z "${SHOREBIRD_TOKEN:-}" ]; then
+            echo "::error::SHOREBIRD_TOKEN secret is missing. Add it under Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+          echo "Shorebird CLI version:"
+          shorebird --version
+          echo "SHOREBIRD_TOKEN is configured (value not logged)."
+
+      - name: Create dart_defines.json
+        run: |
+          set -euo pipefail
+          cat > dart_defines.json <<EOF
+          {
+            "SUPABASE_URL": "${{ secrets.SUPABASE_URL }}",
+            "SUPABASE_ANON_KEY": "${{ secrets.SUPABASE_ANON_KEY }}",
+            "EMAILJS_SERVICE_ID": "${{ secrets.EMAILJS_SERVICE_ID }}",
+            "EMAILJS_TEMPLATE_ID": "${{ secrets.EMAILJS_TEMPLATE_ID }}",
+            "EMAILJS_PUBLIC_KEY": "${{ secrets.EMAILJS_PUBLIC_KEY }}",
+            "SUPER_ADMIN_EMAIL": "${{ secrets.SUPER_ADMIN_EMAIL || 'ravivtu12345@gmail.com' }}",
+            "MAPS_API_KEY": "${{ secrets.MAPS_API_KEY }}"
+          }
+          EOF
+          echo "dart_defines.json created (secrets not printed)."
+
+      - name: Decode signing keystore
+        run: |
+          set -euo pipefail
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-keystore.jks
+          cat > android/key.properties <<EOF
+          storePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}
+          keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}
+          storeFile=upload-keystore.jks
+          EOF
+          echo "Android signing keystore and key.properties configured."
+
+      - name: Resolve dependencies
+        run: |
+          set -euo pipefail
+          flutter pub get
+          echo "Flutter dependencies resolved."
+
+      - name: Log patch context
+        run: |
+          set -euo pipefail
+          echo "============================================"
+          echo "Shorebird OTA patch — build context"
+          echo "============================================"
+          echo "Repository : ${{ github.repository }}"
+          echo "Workflow   : ${{ github.workflow }} #${{ github.run_number }}"
+          echo "Commit     : ${{ github.sha }}"
+          echo "Branch     : ${{ github.ref_name }}"
+          echo "Triggered  : ${{ github.event_name }}"
+          echo "App version: $(grep '^version:' pubspec.yaml)"
+          echo "Shorebird  : $(grep '^app_id:' shorebird.yaml || echo 'app_id not set in shorebird.yaml')"
+          echo "Target     : latest Shorebird Android release"
+          echo "============================================"
+
+      - name: Shorebird patch Android
+        id: shorebird-patch
+        uses: shorebirdtech/shorebird-patch@v1
+        with:
+          platform: android
+          release-version: latest
+          args: --dart-define-from-file=dart_defines.json
+
+      - name: Patch published
+        if: success()
+        run: |
+          set -euo pipefail
+          echo "============================================"
+          echo "Shorebird patch published successfully"
+          echo "Patch number: ${{ steps.shorebird-patch.outputs.patch-number }}"
+          echo "OTA clients will be prompted on next update check (OtaUpdateHost)."
+          echo "============================================"
+
+      - name: Patch upload failed
+        if: failure()
+        run: |
+          echo "::error::Shorebird patch upload failed. No OTA update was published to users."
+          echo "Review the Shorebird patch Android step above for auth, signing, or build errors."
+          exit 1

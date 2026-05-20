@@ -98,7 +98,7 @@ class HomePage extends ConsumerWidget {
                   icon: Icons.water_drop_rounded,
                   label: 'Water supply',
                   accent: AppColors.sky,
-                  onTap: () => context.push(AppRoutePaths.panchayat),
+                  onTap: () => context.push(AppRoutePaths.waterSupply),
                 ),
                 QuickActionCard(
                   icon: Icons.local_hospital_rounded,

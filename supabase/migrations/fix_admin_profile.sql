@@ -23,8 +23,10 @@ with check (auth.uid() = id);
 -- 3) Promote admin by email (case-insensitive)
 update public.users
 set role = 'admin', updated_at = timezone('utc', now())
-where lower(trim(email)) = lower(trim('ravichalmar@gmail.com'));
+where lower(trim(email)) = lower(trim('ravivtu12345@gmail.com'));
 
 -- 4) Verify
 select id, email, role from public.users
-where lower(trim(email)) = lower(trim('ravichalmar@gmail.com'));
+where lower(trim(email)) = lower(trim('ravivtu12345@gmail.com'));
+
+

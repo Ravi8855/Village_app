@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/auth/auth_repository.dart';
+import '../../../../providers/auth_provider.dart';
 import '../../domain/announcement.dart';
 import '../../domain/announcement_category.dart';
 import '../news_providers.dart';
@@ -141,7 +141,7 @@ class _AdminAnnouncementFormState extends ConsumerState<AdminAnnouncementForm> {
     final description = _descriptionController.text.trim();
     if (title.isEmpty || description.isEmpty) return;
 
-    final user = ref.read(authStateProvider).valueOrNull;
+    final user = ref.read(authProvider).user;
     final now = DateTime.now();
     final announcement = Announcement(
       id: widget.existing?.id ?? now.microsecondsSinceEpoch.toString(),
@@ -151,7 +151,7 @@ class _AdminAnnouncementFormState extends ConsumerState<AdminAnnouncementForm> {
       imageUrl: _imageUrlController.text.trim().isEmpty
           ? null
           : _imageUrlController.text.trim(),
-      createdBy: user?.id,
+      createdBy: user?.uid,
       createdAt: widget.existing?.createdAt ?? now,
       updatedAt: now,
       isActive: _isActive,

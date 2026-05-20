@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -25,20 +26,26 @@ class AppTheme {
       ),
     );
 
+    final textTheme = kIsWeb
+        ? base.textTheme.apply(
+            bodyColor: AppColors.soil,
+            displayColor: AppColors.soil,
+          )
+        : GoogleFonts.notoSansTextTheme(base.textTheme).apply(
+            bodyColor: AppColors.soil,
+            displayColor: AppColors.soil,
+          );
+
     return base.copyWith(
       scaffoldBackgroundColor: AppColors.sand,
-      textTheme: GoogleFonts.notoSansTextTheme(base.textTheme).apply(
-        bodyColor: AppColors.soil,
-        displayColor: AppColors.soil,
-      ),
+      textTheme: textTheme,
       appBarTheme: AppBarTheme(
         centerTitle: false,
         elevation: 0,
         scrolledUnderElevation: 0.5,
         backgroundColor: AppColors.sand.withValues(alpha: 0.92),
         foregroundColor: AppColors.soil,
-        titleTextStyle: GoogleFonts.notoSans(
-          fontSize: 20,
+        titleTextStyle: textTheme.titleLarge?.copyWith(
           fontWeight: FontWeight.w600,
           color: AppColors.soil,
         ),
@@ -53,9 +60,10 @@ class AppTheme {
         indicatorColor: AppColors.rice,
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           final selected = states.contains(WidgetState.selected);
-          return GoogleFonts.notoSans(
+          return TextStyle(
             fontSize: 12,
             fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+            color: AppColors.soil,
           );
         }),
       ),

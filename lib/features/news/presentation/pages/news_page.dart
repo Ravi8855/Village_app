@@ -2,15 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-import '../../../../core/auth/auth_repository.dart';
 import '../../../../core/config/env_config.dart';
+import '../../../../providers/auth_provider.dart';
 import '../../../../shared/widgets/announcement_category_chip.dart';
 import '../../../../shared/widgets/app_empty_state.dart';
 import '../../../../shared/widgets/app_status_widgets.dart';
 import '../../domain/announcement.dart';
 import '../../domain/announcement_category.dart';
 import '../news_providers.dart';
-import 'admin_login_page.dart';
 import '../widgets/admin_announcement_form.dart';
 
 class NewsPage extends ConsumerStatefulWidget {
@@ -34,35 +33,12 @@ class _NewsPageState extends ConsumerState<NewsPage> {
     final asyncNews = ref.watch(newsListNotifierProvider);
     final query = ref.watch(newsSearchQueryProvider);
     final categoryFilter = ref.watch(newsCategoryFilterProvider);
-    final isAdmin = ref.watch(isAdminProvider);
-    final authUser = ref.watch(authStateProvider).valueOrNull;
+    final isAdmin = ref.watch(isNewsAdminProvider);
+    final authUser = ref.watch(authProvider).user;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('News & announcements'),
-        actions: [
-          if (isAdmin)
-            IconButton(
-              tooltip: 'Sign out',
-              onPressed: () => ref.read(authRepositoryProvider).signOut(),
-              icon: const Icon(Icons.logout_rounded),
-            )
-          else
-            IconButton(
-              tooltip: 'Admin sign in',
-              onPressed: () async {
-                final signedIn = await Navigator.of(context).push<bool>(
-                  MaterialPageRoute(builder: (_) => const AdminLoginPage()),
-                );
-                if (signedIn == true && mounted) {
-                  ref.invalidate(authStateProvider);
-                  ref.invalidate(isAdminProvider);
-                  ref.invalidate(newsListNotifierProvider);
-                }
-              },
-              icon: const Icon(Icons.admin_panel_settings_outlined),
-            ),
-        ],
       ),
       floatingActionButton: isAdmin
           ? FloatingActionButton.extended(
@@ -80,7 +56,7 @@ class _NewsPageState extends ConsumerState<NewsPage> {
                 alignment: Alignment.centerLeft,
                 child: Chip(
                   avatar: const Icon(Icons.verified_user, size: 18),
-                  label: Text('Admin: ${authUser?.email ?? ''}'),
+                  label: Text('Super admin: ${authUser?.email ?? ''}'),
                 ),
               ),
             ),

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -30,6 +31,7 @@ class _AppUpdateHostState extends ConsumerState<AppUpdateHost>
   @override
   void initState() {
     super.initState();
+    if (kIsWeb) return;
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkForUpdates();
@@ -39,6 +41,10 @@ class _AppUpdateHostState extends ConsumerState<AppUpdateHost>
 
   @override
   void dispose() {
+    if (kIsWeb) {
+      super.dispose();
+      return;
+    }
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }

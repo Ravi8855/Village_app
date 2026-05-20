@@ -1,6 +1,10 @@
 {
   "SUPABASE_URL": "https://YOUR_PROJECT_REF.supabase.co",
   "SUPABASE_ANON_KEY": "YOUR_SUPABASE_ANON_KEY",
-  "ADMIN_EMAIL": "ravichalmar@gmail.com",
+  "EMAILJS_SERVICE_ID": "service_ib2e5fk",
+  "EMAILJS_TEMPLATE_ID": "template_l4ieguu",
+  "EMAILJS_PUBLIC_KEY": "dGt7FQDgGufoc7sVy",
+  "SUPER_ADMIN_EMAIL": "ravivtu12345@gmail.com",
+  "SUPER_ADMIN_PASSWORD": "Naganoor@Super2025",
   "MAPS_API_KEY": ""
 }

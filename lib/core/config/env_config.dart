@@ -1,8 +1,6 @@
 /// Compile-time environment values.
 ///
 /// Loaded via `--dart-define` or `--dart-define-from-file=dart_defines.json`.
-/// Keep real keys in [dart_defines.json] (gitignored); use
-/// [dart_defines.example.json] as a template.
 class EnvConfig {
   static const supabaseUrl = String.fromEnvironment(
     'SUPABASE_URL',
@@ -17,7 +15,6 @@ class EnvConfig {
   static bool get supabaseEnabled =>
       supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty;
 
-  /// Public browser/mobile Maps key (optional).
   static const mapsApiKey = String.fromEnvironment(
     'MAPS_API_KEY',
     defaultValue: '',
@@ -25,12 +22,38 @@ class EnvConfig {
 
   static bool get mapsConfigured => mapsApiKey.isNotEmpty;
 
-  /// Admin account email (compile-time via dart_defines / --dart-define).
-  /// Password is never stored here — only Supabase Auth validates credentials.
-  static const adminEmail = String.fromEnvironment(
-    'ADMIN_EMAIL',
-    defaultValue: 'ravichalmar@gmail.com',
+  /// EmailJS — maps from VITE_* keys when passed via dart_defines.json.
+  static const emailJsServiceId = String.fromEnvironment(
+    'EMAILJS_SERVICE_ID',
+    defaultValue: '',
   );
 
-  static bool get adminEmailConfigured => adminEmail.trim().isNotEmpty;
+  static const emailJsTemplateId = String.fromEnvironment(
+    'EMAILJS_TEMPLATE_ID',
+    defaultValue: '',
+  );
+
+  static const emailJsPublicKey = String.fromEnvironment(
+    'EMAILJS_PUBLIC_KEY',
+    defaultValue: '',
+  );
+
+  static bool get emailJsConfigured =>
+      emailJsServiceId.isNotEmpty &&
+      emailJsTemplateId.isNotEmpty &&
+      emailJsPublicKey.isNotEmpty;
+
+  static const superAdminEmail = String.fromEnvironment(
+    'SUPER_ADMIN_EMAIL',
+    defaultValue: 'ravivtu12345@gmail.com',
+  );
+
+  /// Super admin password (admin login only — not OTP).
+  static const superAdminPassword = String.fromEnvironment(
+    'SUPER_ADMIN_PASSWORD',
+    defaultValue: 'Naganoor@Super2025',
+  );
+
+  static bool get superAdminPasswordConfigured =>
+      superAdminPassword.isNotEmpty;
 }

@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/auth/auth_repository.dart';
+import '../../../providers/auth_provider.dart';
 import '../data/news_local_datasource.dart';
 import '../data/news_remote_supabase_datasource.dart';
 import '../data/news_repository_impl.dart';
@@ -32,7 +32,7 @@ final newsListNotifierProvider =
 class NewsListNotifier extends AsyncNotifier<List<Announcement>> {
   @override
   Future<List<Announcement>> build() {
-    final isAdmin = ref.watch(isAdminProvider);
+    final isAdmin = ref.watch(isNewsAdminProvider);
     return ref
         .read(newsRepositoryProvider)
         .fetchAll(includeInactive: isAdmin);
@@ -40,7 +40,7 @@ class NewsListNotifier extends AsyncNotifier<List<Announcement>> {
 
   Future<void> refresh() async {
     state = const AsyncLoading();
-    final isAdmin = ref.read(isAdminProvider);
+    final isAdmin = ref.read(isNewsAdminProvider);
     state = await AsyncValue.guard(
       () => ref
           .read(newsRepositoryProvider)
@@ -53,7 +53,7 @@ class NewsListNotifier extends AsyncNotifier<List<Announcement>> {
     state = await AsyncValue.guard(() async {
       await ref.read(newsRepositoryProvider).create(announcement);
       return ref.read(newsRepositoryProvider).fetchAll(
-            includeInactive: ref.read(isAdminProvider),
+            includeInactive: ref.read(isNewsAdminProvider),
           );
     });
   }
@@ -63,7 +63,7 @@ class NewsListNotifier extends AsyncNotifier<List<Announcement>> {
     state = await AsyncValue.guard(() async {
       await ref.read(newsRepositoryProvider).update(announcement);
       return ref.read(newsRepositoryProvider).fetchAll(
-            includeInactive: ref.read(isAdminProvider),
+            includeInactive: ref.read(isNewsAdminProvider),
           );
     });
   }
@@ -73,7 +73,7 @@ class NewsListNotifier extends AsyncNotifier<List<Announcement>> {
     state = await AsyncValue.guard(() async {
       await ref.read(newsRepositoryProvider).delete(id);
       return ref.read(newsRepositoryProvider).fetchAll(
-            includeInactive: ref.read(isAdminProvider),
+            includeInactive: ref.read(isNewsAdminProvider),
           );
     });
   }
