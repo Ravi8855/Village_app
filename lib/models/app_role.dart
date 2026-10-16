@@ -4,7 +4,7 @@ enum AppRole {
   deptAdmin('dept_admin'),
   user('user');
 
-  const AppRole(this.value);;
+  const AppRole(this.value);
 
   final String value;
 
