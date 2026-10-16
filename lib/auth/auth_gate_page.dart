@@ -17,7 +17,7 @@ class AuthGatePage extends ConsumerWidget {
     ref.listen<AuthState>(authProvider, (previous, next) {
       if (!next.initialized || next.loading) return;
       final target = next.isLoggedIn ? next.homeRoute : AppRoutePaths.signup;
-      if (context.mounted) context.go(target);
+      if (context.mounted) context.go(target);;
     });
 
     if (auth.initialized && !auth.loading) {
