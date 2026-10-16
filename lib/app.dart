@@ -5,6 +5,7 @@ import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'features/app_update/presentation/widgets/app_update_host.dart';
 import 'features/ota_update/presentation/widgets/ota_update_host.dart';
+import 'shared/widgets/responsive_mobile_frame.dart';
 
 class NaganoorApp extends ConsumerWidget {
   const NaganoorApp({super.key});
@@ -19,6 +20,9 @@ class NaganoorApp extends ConsumerWidget {
           debugShowCheckedModeBanner: false,
           theme: AppTheme.light,
           routerConfig: router,
+          builder: (context, child) {
+            return ResponsiveMobileFrame(child: child!);
+          },
         ),
       ),
     );

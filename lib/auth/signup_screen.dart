@@ -105,7 +105,25 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   InputDecoration _fieldDecoration(String label) {
     return InputDecoration(
       labelText: label,
-      border: const OutlineInputBorder(),
+      filled: true,
+      fillColor: Colors.white,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: AppColors.soil.withValues(alpha: 0.15)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: AppColors.soil.withValues(alpha: 0.15)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: AppColors.leaf, width: 2),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Colors.redAccent),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       errorStyle: const TextStyle(height: 1.1),
     );
   }
@@ -137,28 +155,79 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Form(
             key: _formKey,
             autovalidateMode: autovalidate,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  'Naganoor Village',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.soil,
+                // Village header banner card
+                Container(
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.soil.withValues(alpha: 0.08)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.03),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
                       ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: AppColors.rice,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(Icons.location_city_rounded, color: AppColors.leaf, size: 22),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Naganoor Village',
+                                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.soil,
+                                      ),
+                                ),
+                                const Text(
+                                  'Resident Registration',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.leaf,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        'One-time signup for village residents. After verification, '
+                        'you stay signed in on this device.',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: AppColors.soil.withValues(alpha: 0.8),
+                              height: 1.35,
+                            ),
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  'One-time signup for village residents. After email verification '
-                  'you stay signed in on this device. Administrators should use '
-                  'Admin sign-in instead.',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 18),
                 TextFormField(
                   controller: _firstNameController,
                   textCapitalization: TextCapitalization.words,
@@ -194,7 +263,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
-                  value: _gender,
+                  initialValue: _gender,
                   decoration: _fieldDecoration('Gender *'),
                   items: _genders
                       .map((g) => DropdownMenuItem(value: g, child: Text(g)))
@@ -207,21 +276,38 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 const SizedBox(height: 20),
                 FilledButton.icon(
                   onPressed: _sendingOtp ? null : _sendOtp,
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size.fromHeight(48),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    backgroundColor: AppColors.leaf,
+                  ),
                   icon: _sendingOtp
                       ? const SizedBox(
                           width: 18,
                           height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                         )
                       : const Icon(Icons.mail_outline),
-                  label: Text(_otpSent ? 'Resend OTP' : 'Send OTP'),
+                  label: Text(
+                    _otpSent ? 'Resend OTP' : 'Send OTP',
+                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                  ),
                 ),
-              const SizedBox(height: 12),
-              OutlinedButton.icon(
-                onPressed: () => context.go(AppRoutePaths.adminLogin),
-                icon: const Icon(Icons.admin_panel_settings_outlined),
-                label: const Text('Admin sign-in (password)'),
-              ),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: () => context.go(AppRoutePaths.adminLogin),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(48),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    foregroundColor: AppColors.leaf,
+                    side: const BorderSide(color: AppColors.leaf),
+                  ),
+                  icon: const Icon(Icons.admin_panel_settings_outlined),
+                  label: const Text(
+                    'Admin sign-in (password)',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ),
               if (_otpSent) ...[
                   const SizedBox(height: 24),
                   OtpVerificationPanel(
