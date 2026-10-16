@@ -18,5 +18,5 @@ enum AppRole {
 
   bool get isSuperAdmin => this == AppRole.superAdmin;
   bool get isDeptAdmin => this == AppRole.deptAdmin;
-  bool get isUser => this == AppRole.user;;
+  bool get isUser => this == AppRole.user;
 }
