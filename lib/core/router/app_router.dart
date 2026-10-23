@@ -23,6 +23,7 @@ import '../../features/village_services/presentation/pages/bank_page.dart';
 import '../../features/village_services/presentation/pages/postman_page.dart';
 import '../../features/water_supply/presentation/pages/water_supply_notices_page.dart';
 import '../../features/weather/presentation/pages/weather_page.dart';
+import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../providers/auth_provider.dart';
 import 'auth_route_redirect.dart';
 import '../shell/scaffold_with_bottom_nav.dart';
@@ -202,6 +203,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutePaths.profile,
+                name: AppRouteNames.profile,
+                builder: (context, state) => const ProfilePage(),
+              ),
+            ],
+          ),
         ],
       ),
     ],
@@ -221,6 +231,7 @@ class AppRoutePaths {
   static const news = '/news';
   static const weather = '/weather';
   static const health = '/health';
+  static const profile = '/profile';
   static const waterSupply = '/home/water-supply';
   static const panchayat = '/home/panchayat';
   static const electricity = '/home/panchayat/electricity';
@@ -247,6 +258,7 @@ class AppRouteNames {
   static const news = 'news';
   static const weather = 'weather';
   static const health = 'health';
+  static const profile = 'profile';
   static const waterSupply = 'waterSupply';
   static const panchayat = 'panchayat';
   static const electricity = 'electricity';

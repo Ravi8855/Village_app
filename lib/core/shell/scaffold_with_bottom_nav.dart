@@ -41,6 +41,11 @@ class ScaffoldWithBottomNav extends StatelessWidget {
             selectedIcon: Icon(Icons.local_hospital_rounded),
             label: 'Health',
           ),
+          NavigationDestination(
+            icon: Icon(Icons.person_outline_rounded),
+            selectedIcon: Icon(Icons.person_rounded),
+            label: 'Profile',
+          ),
         ],
       ),
     );

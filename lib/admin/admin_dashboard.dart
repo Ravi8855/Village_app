@@ -27,7 +27,7 @@ class _AdminDashboardState extends ConsumerState<AdminDashboard> {
   static const _tabs = [
     ('Users', Icons.people_outline),
     ('Dept admins', Icons.admin_panel_settings_outlined),
-    ('Content', Icons.apartment_outlined),
+    ('Departments', Icons.apartment_outlined),
   ];
 
   @override
